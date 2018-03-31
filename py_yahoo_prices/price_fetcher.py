@@ -11,10 +11,9 @@ import re
 import requests
 
 _logger = logging.getLogger(__name__)
-yahoo_url = "https://finance.yahoo.com/quote/{}/history?p={}"
 
 def _get_cookies(code):
-    r = requests.get(yahoo_url.format(code, code))
+    r = requests.get("https://finance.yahoo.com/quote/{}/history?p={}".format(code, code))
     # Testing if code exists
     tree = lxml.html.fromstring(r.text)
     name_elem = tree.cssselect('h1.D\(ib\)')
