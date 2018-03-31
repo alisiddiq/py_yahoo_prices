@@ -28,7 +28,7 @@ def _get_cookies(code):
         except AttributeError as e:
             return '', ''
 
-def get_raw_prices(code, start_date, end_date=datetime.now(), interval='1d', retry_attempts=10, sleep_time=5):
+def get_raw_prices(code, start_date, end_date=datetime.now(), interval='1d', retry_attempts=10, sleep_time=3):
     """
     Get raw prices from yahoo in the form of a pd.DataFrame()
     :param code: <str> company code
@@ -42,7 +42,6 @@ def get_raw_prices(code, start_date, end_date=datetime.now(), interval='1d', ret
     start_date_str = '{:.0f}'.format(start_date.timestamp())
     end_date_str = '{:.0f}'.format(end_date.timestamp())
     cookie, crumb = _get_cookies(code)
-    out = None
     url = 'https://query1.finance.yahoo.com/v7/finance/download/{}'.format(code)
 
     params = {
@@ -55,6 +54,7 @@ def get_raw_prices(code, start_date, end_date=datetime.now(), interval='1d', ret
 
     headers = {'Cookie': 'B={}'.format(cookie)}
     response = requests.get(url, headers=headers, params=params)
+    out=None
 
     if response.status_code == 401:
         # retry
@@ -74,7 +74,7 @@ def get_raw_prices(code, start_date, end_date=datetime.now(), interval='1d', ret
         out[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']] = pd.to_numeric(out[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']]
                                                                                      .stack(), errors='coerce').unstack()
         out.index = out['Date']
-        out.sort_index()
+        out.sort_index(inplace=True)
         out.drop('Date', axis=1, inplace=True)
     return out
 
