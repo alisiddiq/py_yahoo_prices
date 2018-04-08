@@ -1,6 +1,5 @@
 import logging
 import time
-import sys
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from io import StringIO
@@ -18,8 +17,7 @@ def _get_cookies(code):
     tree = lxml.html.fromstring(r.text)
     name_elem = tree.cssselect('h1.D\(ib\)')
     if len(name_elem) == 0:
-        _logger.error("company code {} not found".format(code))
-        sys.exit(1)
+        raise ValueError("company code {} not found".format(code))
     else:
         try:
             cookie = r.cookies.get('B')
@@ -59,7 +57,7 @@ def get_raw_prices(code, start_date, end_date=datetime.now(), interval='1d', ret
     if response.status_code == 401:
         # retry
         _logger.error(response.text)
-        _logger.error('Status code 401, retrying after {} secs...'.format(sleep_time))
+        _logger.error('Status code 401 while fetching {}, retrying after {} secs...'.format(code, sleep_time))
         time.sleep(sleep_time)
         if retry_attempts > 0:
             out = get_raw_prices(code, start_date, end_date, interval, retry_attempts - 1, sleep_time)
