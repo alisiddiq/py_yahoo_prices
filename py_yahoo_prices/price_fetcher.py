@@ -80,5 +80,6 @@ def multi_price_fetch(codes_list, start_date, end_date=datetime.now(), interval=
         else:
             dat = StringIO(dat_str)
             df = pd.read_csv(dat)
+            df.dropna(inplace=True, axis=0, how='all')
             out_dict[c] = df
     return out_dict
