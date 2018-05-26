@@ -1,6 +1,6 @@
 # py_yahoo_prices
 
-Get daily/weekly/monthly returns and prices of equities from yahoo's new tricky endpoint query1.finance.yahoo.com/v7/finance/download/
+Get daily/weekly/monthly prices of equities from yahoo's new tricky endpoint query1.finance.yahoo.com/v7/finance/download/
 
 # Installation
 ```
