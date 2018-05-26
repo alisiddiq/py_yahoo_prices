@@ -42,6 +42,7 @@ def _login():
         time.sleep(3)
         return _login()
     else:
+        _logger.info("Logged in successfully, fetching prices...")
         return cookie, crumb
 
 def multi_price_fetch(codes_list, start_date, end_date=datetime.now(), interval='1d'):
@@ -79,14 +80,5 @@ def multi_price_fetch(codes_list, start_date, end_date=datetime.now(), interval=
         else:
             dat = StringIO(dat_str)
             df = pd.read_csv(dat)
-            # Making sure dtypes are converted
-            df['Date'] = pd.to_datetime(df['Date'])
-            df[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']] = pd.to_numeric(
-                df[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']]
-                .stack(), errors='coerce').unstack()
-            df.index = df['Date']
-            df.sort_index(inplace=True)
-            df.drop('Date', axis=1, inplace=True)
             out_dict[c] = df
-
     return out_dict
