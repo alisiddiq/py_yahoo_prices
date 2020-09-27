@@ -46,12 +46,23 @@ def _login():
         _logger.info("Logged in successfully, fetching prices...")
         return cookie, crumb
 
+
 def _single_fetch(args):
     try:
-        return requests.get(url=args['url'], params=args['params'], headers=args['headers'])
+        r = requests.get(url=args['url'], params=args['params'], headers=args['headers'])
     except requests.ConnectionError as e:
-        _logger.error("Error while fetching URL {}, {}".format(args['url'], e))
+        _logger.error("Error while fetching code {}, {}".format(args['code'], e))
         return None
+
+    dat_str = str(r.content, 'ISO-8859-1')
+    if not r.ok:
+        _logger.error("Error while fetching code {}, status code {}, {}".format(args['code'], r.status_code, dat_str))
+    else:
+        dat = StringIO(dat_str)
+        df = pd.read_csv(dat)
+        df.dropna(inplace=True, axis=0, how='all')
+        return df
+
 
 def multi_price_fetch(codes_list, start_date, end_date=None, interval='1d', threads=20):
     """
@@ -79,26 +90,15 @@ def multi_price_fetch(codes_list, start_date, end_date=None, interval='1d', thre
         'crumb': crumb
     }
     request_headers = {'Cookie': 'B={}'.format(cookie), 'User-Agent': USER_AGENT}
-    url_list = [PRICE_URL.format(c) for c in codes_list]
 
-    method_params = [{'url': url,
+    method_params = [{'url': PRICE_URL.format(c),
+                      'code': c,
                       'params': request_params,
-                      'headers': request_headers} for url in url_list]
+                      'headers': request_headers} for c in codes_list]
 
     with ThreadPool(processes=threads) as pool:
-        responses = list(tqdm(pool.imap(_single_fetch, method_params), total=len(method_params)))
+        df_list = list(tqdm(pool.imap(_single_fetch, method_params), total=len(method_params)))
 
-    responses = [r for r in responses if r is not None]
-
-    out_dict = {}
-    for c, response in zip(codes_list, responses):
-        dat_str = str(response.content, 'ISO-8859-1')
-        if not response.ok:
-            _logger.error("Error while fetching code {}, {}".format(c, dat_str))
-        else:
-            dat = StringIO(dat_str)
-            df = pd.read_csv(dat)
-            df.dropna(inplace=True, axis=0, how='all')
-            out_dict[c] = df
+    out_dict = {code: df for code, df in  zip(codes_list, df_list) if df is not None}
     return out_dict
 

@@ -2,6 +2,8 @@
 
 Get daily/weekly/monthly prices of equities from yahoo's new tricky endpoint query1.finance.yahoo.com/v7/finance/download/
 
+If a lot of symbols are fetched at once, the API sometimes returns 404 even for symbols that have the data. Try splitting the queries into multiple chunks if this happens
+
 # Installation
 ```
 pip install py_yahoo_prices
@@ -28,4 +30,4 @@ raw_prices = pf.multi_price_fetch(codes_list=comp_codes,
                                   interval='1d',
                                   threads=50)
 ```
-``
+

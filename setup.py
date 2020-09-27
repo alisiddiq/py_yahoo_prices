@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='py_yahoo_prices',
     packages=find_packages(),
-    version='0.5',
+    version='0.5.1',
     description="Get daily/weekly/monthly prices of equities from yahoo's new tricky endpoint",
     long_description='README.md',
     author = 'Ali Siddiq',
